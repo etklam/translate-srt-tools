@@ -1,6 +1,47 @@
+'use client';
+
+import { useState } from 'react';
 import Image from "next/image";
 
 export default function Home() {
+  const [file, setFile] = useState<File | null>(null);
+  const [translatedText, setTranslatedText] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file) return;
+
+    setLoading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/translate', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('翻譯失敗');
+      }
+
+      const data = await response.json();
+      setTranslatedText(data.translatedText);
+    } catch (error) {
+      console.error('Error:', error);
+      alert('翻譯過程中發生錯誤');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
@@ -49,6 +90,47 @@ export default function Home() {
           >
             Read our docs
           </a>
+        </div>
+
+        <div className="max-w-2xl mx-auto">
+          <h1 className="text-3xl font-bold mb-8">SRT 檔案翻譯工具</h1>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                選擇 SRT 檔案
+              </label>
+              <input
+                type="file"
+                accept=".srt"
+                onChange={handleFileChange}
+                className="block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-md file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-blue-50 file:text-blue-700
+                  hover:file:bg-blue-100"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={!file || loading}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md
+                hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              {loading ? '翻譯中...' : '開始翻譯'}
+            </button>
+          </form>
+
+          {translatedText && (
+            <div className="mt-8">
+              <h2 className="text-xl font-semibold mb-4">翻譯結果</h2>
+              <pre className="bg-gray-100 p-4 rounded-md whitespace-pre-wrap">
+                {translatedText}
+              </pre>
+            </div>
+          )}
         </div>
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
