@@ -5,8 +5,8 @@ const OLLAMA_API_URL = 'http://localhost:11434/api/generate';
 const MODEL_NAME = 'thirdeyeai/DeepSeek-R1-Distill-Qwen-7B-uncensored'; // 或其他您安裝的模型
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
-const MAX_BLOCK_SIZE = 5;
-const REQUEST_DELAY = 1000;
+const MAX_BLOCK_SIZE = 1;
+const REQUEST_DELAY = 0;
 
 // 日誌函數
 function logTranslation(original: string, translated: string) {
